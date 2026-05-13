@@ -172,6 +172,6 @@ Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE) para mais detalhes.
 
 <div align="center">
 
-Feito com 💜 usando [VueFlow](https://vueflow.dev) + [TMDB API](https://www.themoviedb.org)
+[VueFlow](https://vueflow.dev) + [TMDB API](https://www.themoviedb.org)
 
 </div>
