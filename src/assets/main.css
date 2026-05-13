@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --wf-bg-primary:    #0D0D0F;
+  --wf-bg-secondary:  #141417;
+  --wf-bg-elevated:   #1C1C21;
+  --wf-text-primary:  #F2F2F5;
+  --wf-text-muted:    #8A8A9A;
+  --wf-text-faint:    #4A4A5A;
+  --wf-accent:        #7C5CBF;
+  --wf-accent-light:  #A47FE0;
+  --wf-accent-glow:   #7C5CBF33;
+  --wf-watched:       #22C97A;
+  --wf-watched-bg:    #0D2B1F;
+  --wf-next:          #7C5CBF;
+  --wf-next-bg:       #1A1230;
+  --wf-upcoming:      #3A3A45;
+  --wf-upcoming-bg:   #141417;
+  --wf-edge-default:  #3A3A45;
+  --wf-edge-active:   #7C5CBF;
+  --wf-border:        #2A2A35;
+  --wf-border-accent: #7C5CBF55;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--wf-bg-primary);
+  color: var(--wf-text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* VueFlow overrides */
+.vue-flow__edge-path {
+  stroke: var(--wf-edge-default);
+}
+
+.vue-flow__minimap {
+  background-color: var(--wf-bg-elevated);
+  border: 1px solid var(--wf-border);
+  border-radius: 8px;
+}
