@@ -5,6 +5,9 @@ import { getCollection } from '@/services/tmdb'
 import { useFlowBuilder } from '@/composables/useFlowBuilder'
 import { useSagaStore } from '@/stores/sagaStore'
 import FlowCanvas from '@/components/flow/FlowCanvas.vue'
+import FlowList from '@/components/flow/FlowList.vue'
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,26 +18,38 @@ const nodes = ref([])
 const edges = ref([])
 const loading = ref(true)
 const error = ref(null)
+const collectionMeta = ref(null)
+
+const sagaId = computed(() => Number(route.params.id))
+
+const isSaved = computed(() => !!store.savedSagas[sagaId.value])
 
 const progressPercent = computed(() => {
   if (!nodes.value.length) return 0
   return Math.round((store.watchedCount / nodes.value.length) * 100)
 })
 
+function onSave() {
+  if (!collectionMeta.value) return
+  store.saveSaga({
+    id: sagaId.value,
+    name: collectionMeta.value.name ?? '',
+    poster: collectionMeta.value.poster_path ?? null,
+    totalMovies: nodes.value.length,
+  })
+}
+
 onMounted(async () => {
   try {
     const collection = await getCollection(route.params.id)
+    collectionMeta.value = collection
     const flow = buildFlow(collection)
     nodes.value = flow.nodes
     edges.value = flow.edges
 
-    // Inicializa a saga na store com os IDs em ordem
+    // Carrega estado reativo (progresso existente, se já salva)
     const orderedIds = flow.nodes.map((n) => n.data.tmdbId)
-    store.setCurrentSaga(
-      Number(route.params.id),
-      collection.name ?? '',
-      orderedIds
-    )
+    store.setCurrentSaga(sagaId.value, collection.name ?? '', orderedIds)
   } catch {
     error.value = 'Não foi possível carregar esta saga. Tente novamente.'
   } finally {
@@ -49,14 +64,10 @@ onMounted(async () => {
     <!-- Loading -->
     <div
       v-if="loading"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10"
+      class="absolute inset-0 flex items-center justify-center z-10"
       style="background: var(--wf-bg-primary)"
     >
-      <div
-        class="w-8 h-8 rounded-full border-2 animate-spin"
-        style="border-color: var(--wf-border); border-top-color: var(--wf-accent)"
-      />
-      <span class="text-sm" style="color: var(--wf-text-muted)">Carregando saga...</span>
+      <LoadingSpinner label="Carregando saga..." />
     </div>
 
     <!-- Error -->
@@ -69,47 +80,83 @@ onMounted(async () => {
         <circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" />
       </svg>
       <p class="text-base" style="color: var(--wf-text-muted)">{{ error }}</p>
-      <button
-        class="px-4 py-2 rounded-lg text-sm font-medium"
-        style="background: var(--wf-accent); color: #fff"
-        @click="router.back()"
-      >
-        Voltar
-      </button>
+      <BaseButton variant="primary" @click="router.back()">Voltar</BaseButton>
     </div>
 
     <!-- Flow -->
     <template v-else>
-      <!-- Barra de topo: nome da saga + progresso -->
-      <div
-        class="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 px-4 py-2 rounded-full pointer-events-none"
-        style="background: var(--wf-bg-elevated); border: 1px solid var(--wf-border)"
-      >
-        <span class="text-sm font-medium" style="color: var(--wf-text-primary)">
-          {{ store.currentSagaName }}
-        </span>
-        <span class="text-xs px-2 py-0.5 rounded-full" style="background: var(--wf-bg-primary); color: var(--wf-text-muted)">
-          {{ store.watchedCount }}/{{ nodes.length }}
-        </span>
-        <div class="w-20 h-1.5 rounded-full overflow-hidden" style="background: var(--wf-border)">
-          <div
-            class="h-full rounded-full transition-all duration-500"
-            :style="{ width: progressPercent + '%', background: progressPercent === 100 ? 'var(--wf-watched)' : 'var(--wf-accent)' }"
-          />
+
+      <!-- ── Barra de topo ──────────────────────────────────────────── -->
+      <div class="absolute top-4 left-4 right-4 z-10 flex items-center gap-3">
+
+        <!-- Nome + progresso (centralizado) -->
+        <div
+          class="flex items-center gap-3 px-4 py-2 rounded-full mx-auto pointer-events-none"
+          style="background: var(--wf-bg-elevated); border: 1px solid var(--wf-border)"
+        >
+          <span class="text-sm font-medium hidden sm:inline" style="color: var(--wf-text-primary)">
+            {{ store.currentSagaName }}
+          </span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background: var(--wf-bg-primary); color: var(--wf-text-muted)">
+            {{ store.watchedCount }}/{{ nodes.length }}
+          </span>
+          <div class="w-20 h-1.5 rounded-full overflow-hidden" style="background: var(--wf-border)">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :style="{
+                width: progressPercent + '%',
+                background: progressPercent === 100 ? 'var(--wf-watched)' : 'var(--wf-accent)'
+              }"
+            />
+          </div>
+          <span class="text-xs" style="color: var(--wf-text-muted)">{{ progressPercent }}%</span>
         </div>
-        <span class="text-xs" style="color: var(--wf-text-muted)">{{ progressPercent }}%</span>
+
+        <!-- Botão favoritar -->
+        <button
+          class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all"
+          :style="isSaved
+            ? 'background: var(--wf-watched-bg); color: var(--wf-watched); border: 1px solid var(--wf-watched)'
+            : 'background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)'"
+          :aria-label="isSaved ? 'Saga salva em Minhas Sagas' : 'Salvar saga em Minhas Sagas'"
+          @click="onSave"
+        >
+          <svg v-if="isSaved" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="hidden sm:inline">{{ isSaved ? 'Salva' : 'Salvar' }}</span>
+        </button>
       </div>
 
-      <!-- Dica de interação (some após primeira ação) -->
-      <div
-        v-if="store.watchedCount === 0"
-        class="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-full text-xs pointer-events-none"
-        style="background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)"
-      >
-        Clique em um nó para marcar como assistido
+      <!-- Dica inicial -->
+      <Transition name="fade">
+        <div
+          v-if="store.watchedCount === 0"
+          class="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-full text-xs pointer-events-none hidden sm:block"
+          style="background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)"
+        >
+          Clique em um nó para marcar como assistido
+        </div>
+      </Transition>
+
+      <!-- Desktop: FlowCanvas -->
+      <div class="hidden sm:block w-full h-full">
+        <FlowCanvas :nodes="nodes" :edges="edges" />
       </div>
 
-      <FlowCanvas :nodes="nodes" :edges="edges" />
+      <!-- Mobile: lista de filmes -->
+      <div class="sm:hidden w-full h-full overflow-y-auto" style="padding-top: 64px">
+        <FlowList :nodes="nodes" />
+      </div>
+
     </template>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.4s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
