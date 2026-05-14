@@ -1,3 +1,6 @@
+<!-- eslint-disable vue/max-attributes-per-line -->
+<!-- eslint-disable vue/max-attributes-per-line -->
+<!-- eslint-disable vue/max-attributes-per-line -->
 <script setup>
 import { watch, onMounted, onUnmounted } from 'vue'
 import { useMovieDetails } from '@/composables/useMovieDetails'
@@ -46,39 +49,91 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       @click.stop
     >
       <!-- ── Loading ──────────────────────────────────────── -->
-      <div v-if="loading" class="flex flex-col h-full">
+      <div
+        v-if="loading"
+        class="flex flex-col h-full"
+      >
         <!-- skeleton backdrop -->
-        <div class="w-full h-52 animate-pulse" style="background: var(--wf-bg-elevated)" />
+        <div
+          class="w-full h-52 animate-pulse"
+          style="background: var(--wf-bg-elevated)"
+        />
         <div class="p-5 flex flex-col gap-4">
-          <div class="h-6 w-3/4 rounded-lg animate-pulse" style="background: var(--wf-bg-elevated)" />
-          <div class="h-4 w-1/3 rounded-lg animate-pulse" style="background: var(--wf-bg-elevated)" />
+          <div
+            class="h-6 w-3/4 rounded-lg animate-pulse"
+            style="background: var(--wf-bg-elevated)"
+          />
+          <div
+            class="h-4 w-1/3 rounded-lg animate-pulse"
+            style="background: var(--wf-bg-elevated)"
+          />
           <div class="flex flex-col gap-2 mt-2">
-            <div class="h-3 w-full rounded animate-pulse" style="background: var(--wf-bg-elevated)" />
-            <div class="h-3 w-full rounded animate-pulse" style="background: var(--wf-bg-elevated)" />
-            <div class="h-3 w-2/3 rounded animate-pulse" style="background: var(--wf-bg-elevated)" />
+            <div
+              class="h-3 w-full rounded animate-pulse"
+              style="background: var(--wf-bg-elevated)" 
+            />
+            <div
+              class="h-3 w-full rounded animate-pulse"
+              style="background: var(--wf-bg-elevated)"
+            />
+            <div
+              class="h-3 w-2/3 rounded animate-pulse"
+              style="background: var(--wf-bg-elevated)"
+            />
           </div>
         </div>
       </div>
 
       <!-- ── Error ───────────────────────────────────────── -->
-      <div v-else-if="error" class="flex flex-col items-center justify-center h-full gap-3 p-6">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--wf-text-faint)">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+      <div
+        v-else-if="error"
+        class="flex flex-col items-center justify-center h-full gap-3 p-6"
+      >
+        <svg
+          width="36"
+          height="36"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5" 
+          style="color: 
+          var(--wf-text-faint)"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <path 
+            d="M12 8v4m0 4h.01"
+          />
         </svg>
-        <p class="text-sm text-center" style="color: var(--wf-text-muted)">{{ error }}</p>
+        <p
+          class="text-sm text-center"
+          style="color: var(--wf-text-muted)"
+        >
+          {{ error }}
+        </p>
       </div>
 
       <!-- ── Conteúdo ─────────────────────────────────────── -->
       <template v-else-if="details">
-<!-- Backdrop -->
-        <div class="relative flex-shrink-0" style="height: 210px">
+        <!-- Backdrop -->
+        <div
+          class="relative flex-shrink-0"
+          style="height: 210px"
+        >
           <img
             v-if="details.backdrop"
             :src="details.backdrop"
             :alt="details.title"
             class="w-full h-full object-cover"
+          >
+          <div
+            v-else
+            class="w-full h-full"
+            style="background: var(--wf-bg-elevated)"
           />
-          <div v-else class="w-full h-full" style="background: var(--wf-bg-elevated)" />
 
           <!-- Gradiente -->
           <div
@@ -93,8 +148,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             aria-label="Fechar painel"
             @click="emit('close')"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M18 6 6 18M6 6l12 12"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path 
+                d="M18 6 6 18M6 6l12 12"
+              />
             </svg>
           </button>
 
@@ -116,14 +180,24 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <!-- Scroll content -->
         <div class="flex-1 overflow-y-auto">
           <div class="p-5 flex flex-col gap-5">
-<!-- Título + meta -->
+            <!-- Título + meta -->
             <div>
-              <h2 class="text-xl font-semibold leading-tight" style="color: var(--wf-text-primary)">
+              <h2
+                class="text-xl font-semibold leading-tight"
+                style="color: var(--wf-text-primary)"
+              >
                 {{ details.title }}
               </h2>
               <div class="flex items-center gap-3 mt-2 flex-wrap">
-                <span class="text-sm" style="color: var(--wf-text-muted)">{{ details.year }}</span>
-                <span v-if="details.runtime" class="text-sm" style="color: var(--wf-text-muted)">
+                <span
+                  class="text-sm"
+                  style="color: var(--wf-text-muted)"
+                >{{ details.year }}</span>
+                <span
+                  v-if="details.runtime"
+                  class="text-sm"
+                  style="color: var(--wf-text-muted)"
+                >
                   {{ Math.floor(details.runtime / 60) }}h {{ details.runtime % 60 }}min
                 </span>
                 <span
@@ -131,8 +205,15 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                   class="flex items-center gap-1 text-sm font-medium"
                   style="color: #FBBF24"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <polygon 
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    />
                   </svg>
                   {{ details.rating }}
                 </span>
@@ -149,15 +230,28 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
             <!-- Sinopse -->
             <div>
-              <h3 class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--wf-text-faint)">Sinopse</h3>
-              <p class="text-sm leading-relaxed" style="color: var(--wf-text-muted)">
+              <h3
+                class="text-xs font-semibold uppercase tracking-wider mb-2"
+                style="color: var(--wf-text-faint)"
+              >
+                Sinopse
+              </h3>
+              <p
+                class="text-sm leading-relaxed"
+                style="color: var(--wf-text-muted)"
+              >
                 {{ details.overview }}
               </p>
             </div>
 
             <!-- Elenco -->
             <div v-if="details.cast.length">
-              <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: var(--wf-text-faint)">Elenco principal</h3>
+              <h3
+                class="text-xs font-semibold uppercase tracking-wider mb-3"
+                style="color: var(--wf-text-faint)"
+              >
+                Elenco principal
+              </h3>
               <div class="flex gap-3">
                 <div
                   v-for="actor in details.cast"
@@ -175,10 +269,13 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
                       :src="actor.photo"
                       :alt="actor.name"
                       class="w-full h-full object-cover"
-                    />
+                    >
                     <span v-else>{{ actor.initials }}</span>
                   </div>
-                  <p class="text-center leading-tight" style="font-size: 10px; color: var(--wf-text-muted); word-break: break-word">
+                  <p
+                    class="text-center leading-tight"
+                    style="font-size: 10px; color: var(--wf-text-muted); word-break: break-word"
+                  >
                     {{ actor.name.split(' ')[0] }}
                   </p>
                 </div>
@@ -205,15 +302,23 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               class="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-medium transition-colors"
               style="background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: #FF0000">
-                <path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.8 0 7-.1c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.7 14.5V9l5.3 2.8-5.3 2.7z"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style="color: #FF0000"
+              >
+                <path 
+                  d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.8 5 12 5 12 5s-4.8 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.2.8C6.8 19 12 19 12 19s4.8 0 7-.1c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8zM9.7 14.5V9l5.3 2.8-5.3 2.7z"
+                />
               </svg>
               Ver trailer no YouTube
             </a>
-</div>
+          </div>
         </div>
       </template>
-</aside>
+    </aside>
   </Transition>
 </template>
 
