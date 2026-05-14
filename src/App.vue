@@ -1,10 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
 import AppHeader from '@/components/ui/AppHeader.vue'
-import { useProgress } from '@/composables/useProgress'
-
-const { loadFromStorage } = useProgress()
-onMounted(() => loadFromStorage())
 </script>
 
 <template>
