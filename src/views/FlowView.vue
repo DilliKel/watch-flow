@@ -6,6 +6,7 @@ import { useFlowBuilder } from '@/composables/useFlowBuilder'
 import { useSagaStore } from '@/stores/sagaStore'
 import FlowCanvas from '@/components/flow/FlowCanvas.vue'
 import FlowList from '@/components/flow/FlowList.vue'
+import MovieDrawer from '@/components/flow/MovieDrawer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
@@ -20,8 +21,21 @@ const loading = ref(true)
 const error = ref(null)
 const collectionMeta = ref(null)
 
-const sagaId = computed(() => Number(route.params.id))
+// Drawer
+const drawerOpen = ref(false)
+const selectedTmdbId = ref(null)
 
+function openDrawer(tmdbId) {
+  selectedTmdbId.value = tmdbId
+  drawerOpen.value = true
+}
+
+function closeDrawer() {
+  drawerOpen.value = false
+  selectedTmdbId.value = null
+}
+
+const sagaId = computed(() => Number(route.params.id))
 const isSaved = computed(() => !!store.savedSagas[sagaId.value])
 
 const progressPercent = computed(() => {
@@ -47,7 +61,6 @@ onMounted(async () => {
     nodes.value = flow.nodes
     edges.value = flow.edges
 
-    // Carrega estado reativo (progresso existente, se já salva)
     const orderedIds = flow.nodes.map((n) => n.data.tmdbId)
     store.setCurrentSaga(sagaId.value, collection.name ?? '', orderedIds)
   } catch {
@@ -83,13 +96,10 @@ onMounted(async () => {
       <BaseButton variant="primary" @click="router.back()">Voltar</BaseButton>
     </div>
 
-    <!-- Flow -->
     <template v-else>
 
       <!-- ── Barra de topo ──────────────────────────────────────────── -->
       <div class="absolute top-4 left-4 right-4 z-10 flex items-center gap-3">
-
-        <!-- Nome + progresso (centralizado) -->
         <div
           class="flex items-center gap-3 px-4 py-2 rounded-full mx-auto pointer-events-none"
           style="background: var(--wf-bg-elevated); border: 1px solid var(--wf-border)"
@@ -138,21 +148,29 @@ onMounted(async () => {
           class="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-full text-xs pointer-events-none hidden sm:block"
           style="background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)"
         >
-          Clique em um nó para marcar como assistido
+          Clique em um filme para ver os detalhes
         </div>
       </Transition>
 
       <!-- Desktop: FlowCanvas -->
       <div class="hidden sm:block w-full h-full">
-        <FlowCanvas :nodes="nodes" :edges="edges" />
+        <FlowCanvas :nodes="nodes" :edges="edges" @node-click="openDrawer" />
       </div>
 
-      <!-- Mobile: lista de filmes -->
+      <!-- Mobile: lista -->
       <div class="sm:hidden w-full h-full overflow-y-auto" style="padding-top: 64px">
-        <FlowList :nodes="nodes" />
+        <FlowList :nodes="nodes" @node-click="openDrawer" />
       </div>
 
     </template>
+
+    <!-- Drawer de detalhes -->
+    <MovieDrawer
+      :tmdb-id="selectedTmdbId"
+      :open="drawerOpen"
+      @close="closeDrawer"
+    />
+
   </div>
 </template>
 
