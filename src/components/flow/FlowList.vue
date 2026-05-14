@@ -6,6 +6,8 @@ const props = defineProps({
   nodes: { type: Array, default: () => [] },
 })
 
+const emit = defineEmits(['nodeClick'])
+
 const store = useSagaStore()
 
 const movies = computed(() =>
@@ -23,7 +25,7 @@ const statusColor = {
 <template>
   <div class="px-4 pb-8">
     <p class="text-xs mb-4 text-center" style="color: var(--wf-text-faint)">
-      Toque em um filme para marcar como assistido
+      Toque em um filme para ver os detalhes
     </p>
 
     <div class="flex flex-col gap-2">
@@ -36,9 +38,8 @@ const statusColor = {
           border: `1px solid ${statusColor[store.getStatus(node.data.tmdbId)]}33`,
           opacity: store.getStatus(node.data.tmdbId) === 'upcoming' ? 0.6 : 1,
         }"
-        @click="store.toggleWatched(node.data.tmdbId)"
+        @click="emit('nodeClick', node.data.tmdbId)"
       >
-        <!-- Pôster miniatura -->
         <div class="flex-shrink-0 w-8 h-12 rounded overflow-hidden" style="background: var(--wf-bg-primary)">
           <img
             v-if="node.data.poster"
@@ -48,7 +49,6 @@ const statusColor = {
           />
         </div>
 
-        <!-- Info -->
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium truncate" style="color: var(--wf-text-primary)">
             {{ node.data.order }}. {{ node.data.title }}
@@ -56,7 +56,6 @@ const statusColor = {
           <p class="text-xs mt-0.5" style="color: var(--wf-text-muted)">{{ node.data.year }}</p>
         </div>
 
-        <!-- Status badge -->
         <span
           class="flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium"
           :style="{
