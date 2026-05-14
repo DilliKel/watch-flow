@@ -18,6 +18,10 @@ export const useSagaStore = defineStore('saga', () => {
 
   const watchedCount = computed(() => watchedIds.value.size)
 
+  const isCompleted = computed(
+    () => orderedIds.value.length > 0 && watchedIds.value.size === orderedIds.value.length
+  )
+
   // ── Persistência ─────────────────────────────────────────────────────────
 
   function loadFromStorage() {
@@ -103,6 +107,7 @@ export const useSagaStore = defineStore('saga', () => {
     watchedIds,
     nextId,
     watchedCount,
+    isCompleted,
     loadFromStorage,
     saveSaga,
     setCurrentSaga,
