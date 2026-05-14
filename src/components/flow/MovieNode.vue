@@ -28,9 +28,6 @@ const nodeOpacity = computed(() => (status.value === 'upcoming' ? '0.55' : '1'))
 // Stagger: cap at 800ms para sagas longas
 const animDelay = computed(() => `${Math.min((props.data.order - 1) * 50, 800)}ms`)
 
-function onClick() {
-  store.toggleWatched(props.data.tmdbId)
-}
 </script>
 
 <template>
@@ -43,7 +40,6 @@ function onClick() {
       animationDelay: animDelay,
     }"
     :class="{ 'movie-node--next': status === 'next' }"
-    @click="onClick"
   >
     <!-- Handle de entrada (topo) -->
     <Handle type="target" :position="Position.Top" class="wf-handle" />
