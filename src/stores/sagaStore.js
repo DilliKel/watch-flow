@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, reactive, computed, toRaw } from 'vue'
 
 const STORAGE_KEY = 'watchflow_data'
 
 export const useSagaStore = defineStore('saga', () => {
-  // Todas as sagas salvas: { [sagaId]: { name, poster, totalMovies, savedAt, watched[] } }
-  const savedSagas = ref({})
+  // reactive({}) garante rastreamento de adição/remoção de chaves pelo Vue
+  const savedSagas = reactive({})
 
-  // Saga sendo visualizada no momento
   const currentSagaId = ref(null)
   const currentSagaName = ref('')
   const orderedIds = ref([])
@@ -26,32 +25,31 @@ export const useSagaStore = defineStore('saga', () => {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return
       const data = JSON.parse(raw)
-      savedSagas.value = data.sagas ?? {}
+      const incoming = data.sagas ?? {}
+      // Limpa e repopula sem trocar a referência do reactive
+      Object.keys(savedSagas).forEach((k) => delete savedSagas[k])
+      Object.assign(savedSagas, incoming)
     } catch {}
   }
 
   function _persist() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sagas: savedSagas.value }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sagas: toRaw(savedSagas) }))
     } catch {}
   }
 
   // ── Saga atual ───────────────────────────────────────────────────────────
 
   function saveSaga({ id, name, poster, totalMovies }) {
-    const existing = savedSagas.value[id]
-    // Se é a saga atual, captura o progresso em memória no momento do clique
+    const existing = savedSagas[id]
     const currentWatched =
       currentSagaId.value === id ? [...watchedIds.value] : (existing?.watched ?? [])
-    savedSagas.value = {
-      ...savedSagas.value,
-      [id]: {
-        name,
-        poster,
-        totalMovies,
-        savedAt: existing?.savedAt ?? new Date().toISOString(),
-        watched: currentWatched,
-      },
+    savedSagas[id] = {
+      name,
+      poster,
+      totalMovies,
+      savedAt: existing?.savedAt ?? new Date().toISOString(),
+      watched: currentWatched,
     }
     _persist()
   }
@@ -60,7 +58,7 @@ export const useSagaStore = defineStore('saga', () => {
     currentSagaId.value = sagaId
     currentSagaName.value = sagaName
     orderedIds.value = movieIds
-    const saved = savedSagas.value[sagaId]?.watched ?? []
+    const saved = savedSagas[sagaId]?.watched ?? []
     watchedIds.value = new Set(saved)
   }
 
@@ -76,11 +74,8 @@ export const useSagaStore = defineStore('saga', () => {
     watchedIds.value = updated
 
     const sagaId = currentSagaId.value
-    if (sagaId && savedSagas.value[sagaId]) {
-      savedSagas.value = {
-        ...savedSagas.value,
-        [sagaId]: { ...savedSagas.value[sagaId], watched: [...updated] },
-      }
+    if (sagaId && savedSagas[sagaId]) {
+      savedSagas[sagaId].watched = [...updated]
       _persist()
     }
   }
@@ -88,7 +83,7 @@ export const useSagaStore = defineStore('saga', () => {
   // ── Painel pessoal ───────────────────────────────────────────────────────
 
   function getProgress(sagaId) {
-    const saga = savedSagas.value[sagaId]
+    const saga = savedSagas[sagaId]
     if (!saga) return { watched: 0, total: 0, percent: 0 }
     const watched = saga.watched?.length ?? 0
     const total = saga.totalMovies ?? 0
@@ -96,9 +91,7 @@ export const useSagaStore = defineStore('saga', () => {
   }
 
   function removeSaga(sagaId) {
-    const updated = { ...savedSagas.value }
-    delete updated[sagaId]
-    savedSagas.value = updated
+    delete savedSagas[sagaId]
     _persist()
   }
 
