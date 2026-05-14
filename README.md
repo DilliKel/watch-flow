@@ -159,8 +159,8 @@ Tipografia: **Bebas Neue** para o logotipo · **Inter** para o restante
 - [x] **Sprint 1** — Setup base, VueFlow funcionando
 - [x] **Sprint 2** — Integração com TMDB API
 - [x] **Sprint 3** — Nós customizados com status visual
-- [ ] **Sprint 4** — Tela "Minhas Sagas" + persistência completa
-- [ ] **Sprint 5** — Polimento visual, animações e deploy
+- [x] **Sprint 4** — Tela "Minhas Sagas" + persistência completa
+- [x] **Sprint 5** — Polimento visual, botão de favoritar, animações e deploy
 
 ---
 
