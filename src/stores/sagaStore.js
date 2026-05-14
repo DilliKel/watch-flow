@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, reactive, computed, toRaw } from 'vue'
-
-const STORAGE_KEY = 'watchflow_data'
+import { ref, reactive, computed } from 'vue'
 
 export const useSagaStore = defineStore('saga', () => {
   // reactive({}) garante rastreamento de adição/remoção de chaves pelo Vue
@@ -22,26 +20,6 @@ export const useSagaStore = defineStore('saga', () => {
     () => orderedIds.value.length > 0 && watchedIds.value.size === orderedIds.value.length
   )
 
-  // ── Persistência ─────────────────────────────────────────────────────────
-
-  function loadFromStorage() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const data = JSON.parse(raw)
-      const incoming = data.sagas ?? {}
-      // Limpa e repopula sem trocar a referência do reactive
-      Object.keys(savedSagas).forEach((k) => delete savedSagas[k])
-      Object.assign(savedSagas, incoming)
-    } catch {}
-  }
-
-  function _persist() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sagas: toRaw(savedSagas) }))
-    } catch {}
-  }
-
   // ── Saga atual ───────────────────────────────────────────────────────────
 
   function saveSaga({ id, name, poster, totalMovies }) {
@@ -55,7 +33,6 @@ export const useSagaStore = defineStore('saga', () => {
       savedAt: existing?.savedAt ?? new Date().toISOString(),
       watched: currentWatched,
     }
-    _persist()
   }
 
   function setCurrentSaga(sagaId, sagaName, movieIds) {
@@ -80,7 +57,6 @@ export const useSagaStore = defineStore('saga', () => {
     const sagaId = currentSagaId.value
     if (sagaId && savedSagas[sagaId]) {
       savedSagas[sagaId].watched = [...updated]
-      _persist()
     }
   }
 
@@ -96,7 +72,6 @@ export const useSagaStore = defineStore('saga', () => {
 
   function removeSaga(sagaId) {
     delete savedSagas[sagaId]
-    _persist()
   }
 
   return {
@@ -108,7 +83,6 @@ export const useSagaStore = defineStore('saga', () => {
     nextId,
     watchedCount,
     isCompleted,
-    loadFromStorage,
     saveSaga,
     setCurrentSaga,
     getStatus,
@@ -116,4 +90,9 @@ export const useSagaStore = defineStore('saga', () => {
     getProgress,
     removeSaga,
   }
+}, {
+  persist: {
+    key: 'watchflow_data',
+    paths: ['savedSagas'],
+  },
 })
