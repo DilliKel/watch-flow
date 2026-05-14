@@ -25,17 +25,6 @@ WatchFlow transforma sagas de filmes em **grafos interativos navegáveis**. Busq
 
 ---
 
-## 🖥️ Demo
-
-> _Screenshots e GIF do fluxo completo serão adicionados após o deploy_
-
-<!-- Substitua pelos screenshots reais após o deploy -->
-| Tela inicial | Flow da saga |
-|:---:|:---:|
-| ![Home](docs/screenshot-home.png) | ![Flow](docs/screenshot-flow.png) |
-
----
-
 ## 🚀 Funcionalidades
 
 - 🔍 **Busca em tempo real** com debounce de 400ms contra a TMDB API
