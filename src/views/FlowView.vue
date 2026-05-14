@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCollection } from '@/services/tmdb'
+import { getCollection, getPosterUrl } from '@/services/tmdb'
 import { useFlowBuilder } from '@/composables/useFlowBuilder'
 import { useSagaStore } from '@/stores/sagaStore'
+import confetti from 'canvas-confetti'
 import FlowCanvas from '@/components/flow/FlowCanvas.vue'
 import FlowList from '@/components/flow/FlowList.vue'
 import MovieDrawer from '@/components/flow/MovieDrawer.vue'
@@ -20,6 +21,21 @@ const edges = ref([])
 const loading = ref(true)
 const error = ref(null)
 const collectionMeta = ref(null)
+
+// Backdrop + completion
+const collectionBackdrop = ref(null)
+const completionVisible = ref(false)
+
+function triggerConfetti() {
+  confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+  setTimeout(() => confetti({ particleCount: 60, spread: 120, origin: { y: 0.5 } }), 400)
+  completionVisible.value = true
+  setTimeout(() => { completionVisible.value = false }, 3000)
+}
+
+watch(() => store.isCompleted, (val) => {
+  if (val) triggerConfetti()
+})
 
 // Drawer
 const drawerOpen = ref(false)
@@ -63,6 +79,9 @@ onMounted(async () => {
 
     const orderedIds = flow.nodes.map((n) => n.data.tmdbId)
     store.setCurrentSaga(sagaId.value, collection.name ?? '', orderedIds)
+    collectionBackdrop.value = collection.backdrop_path
+      ? getPosterUrl(collection.backdrop_path, 'original')
+      : null
   } catch {
     error.value = 'Não foi possível carregar esta saga. Tente novamente.'
   } finally {
@@ -73,6 +92,20 @@ onMounted(async () => {
 
 <template>
   <div class="relative w-full" style="height: calc(100vh - 56px)">
+
+    <!-- Backdrop cinematográfico -->
+    <div
+      v-if="collectionBackdrop"
+      class="absolute inset-0 pointer-events-none"
+      style="z-index: 0; overflow: hidden"
+    >
+      <img
+        :src="collectionBackdrop"
+        class="absolute w-full h-full object-cover"
+        style="filter: blur(10px) brightness(0.18); transform: scale(1.08)"
+        alt=""
+      />
+    </div>
 
     <!-- Loading -->
     <div
@@ -141,6 +174,17 @@ onMounted(async () => {
         </button>
       </div>
 
+      <!-- Banner Saga completa -->
+      <Transition name="fade">
+        <div
+          v-if="completionVisible"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 px-8 py-5 rounded-2xl text-center pointer-events-none"
+          style="background: var(--wf-bg-elevated); border: 1px solid var(--wf-watched); color: var(--wf-watched)"
+        >
+          <p class="text-2xl font-bold">🎉 Saga completa!</p>
+        </div>
+      </Transition>
+
       <!-- Dica inicial -->
       <Transition name="fade">
         <div
@@ -153,12 +197,12 @@ onMounted(async () => {
       </Transition>
 
       <!-- Desktop: FlowCanvas -->
-      <div class="hidden sm:block w-full h-full">
+      <div class="hidden sm:block w-full h-full" style="position: relative; z-index: 1">
         <FlowCanvas :nodes="nodes" :edges="edges" @node-click="openDrawer" />
       </div>
 
       <!-- Mobile: lista -->
-      <div class="sm:hidden w-full h-full overflow-y-auto" style="padding-top: 64px">
+      <div class="sm:hidden w-full h-full overflow-y-auto" style="position: relative; z-index: 1; padding-top: 64px">
         <FlowList :nodes="nodes" @node-click="openDrawer" />
       </div>
 
