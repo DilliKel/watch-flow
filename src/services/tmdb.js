@@ -31,3 +31,9 @@ export async function searchMovies(query) {
   )
   return data.results ?? []
 }
+
+export async function getMovieDetails(id) {
+  return request(
+    `/movie/${id}?api_key=${KEY}&language=pt-BR&append_to_response=credits,videos`
+  )
+}
