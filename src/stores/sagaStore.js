@@ -1,30 +1,66 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+const STORAGE_KEY = 'watchflow_data'
+
 export const useSagaStore = defineStore('saga', () => {
-  // IDs dos filmes assistidos na saga atual
-  const watchedIds = ref(new Set())
+  // Todas as sagas salvas: { [sagaId]: { name, poster, totalMovies, savedAt, watched[] } }
+  const savedSagas = ref({})
 
-  // IDs ordenados dos filmes da saga atual (para calcular "next")
-  const orderedIds = ref([])
-
-  // ID e nome da saga atual
+  // Saga sendo visualizada no momento
   const currentSagaId = ref(null)
   const currentSagaName = ref('')
+  const orderedIds = ref([])
+  const watchedIds = ref(new Set())
 
-  const nextId = computed(() => {
-    return orderedIds.value.find((id) => !watchedIds.value.has(id)) ?? null
-  })
+  const nextId = computed(() =>
+    orderedIds.value.find((id) => !watchedIds.value.has(id)) ?? null
+  )
 
   const watchedCount = computed(() => watchedIds.value.size)
+
+  // ── Persistência ─────────────────────────────────────────────────────────
+
+  function loadFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const data = JSON.parse(raw)
+      savedSagas.value = data.sagas ?? {}
+    } catch {}
+  }
+
+  function _persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sagas: savedSagas.value }))
+    } catch {}
+  }
+
+  // ── Saga atual ───────────────────────────────────────────────────────────
+
+  function saveSaga({ id, name, poster, totalMovies }) {
+    const existing = savedSagas.value[id]
+    // Se é a saga atual, captura o progresso em memória no momento do clique
+    const currentWatched =
+      currentSagaId.value === id ? [...watchedIds.value] : (existing?.watched ?? [])
+    savedSagas.value = {
+      ...savedSagas.value,
+      [id]: {
+        name,
+        poster,
+        totalMovies,
+        savedAt: existing?.savedAt ?? new Date().toISOString(),
+        watched: currentWatched,
+      },
+    }
+    _persist()
+  }
 
   function setCurrentSaga(sagaId, sagaName, movieIds) {
     currentSagaId.value = sagaId
     currentSagaName.value = sagaName
     orderedIds.value = movieIds
-
-    // Carrega progresso salvo do localStorage (Sprint 4 expande isso)
-    const saved = loadProgress(sagaId)
+    const saved = savedSagas.value[sagaId]?.watched ?? []
     watchedIds.value = new Set(saved)
   }
 
@@ -36,47 +72,50 @@ export const useSagaStore = defineStore('saga', () => {
 
   function toggleWatched(tmdbId) {
     const updated = new Set(watchedIds.value)
-    if (updated.has(tmdbId)) {
-      updated.delete(tmdbId)
-    } else {
-      updated.add(tmdbId)
-    }
+    updated.has(tmdbId) ? updated.delete(tmdbId) : updated.add(tmdbId)
     watchedIds.value = updated
-    saveProgress(currentSagaId.value, [...updated])
-  }
 
-  function saveProgress(sagaId, ids) {
-    if (!sagaId) return
-    try {
-      const raw = localStorage.getItem('watchflow_data')
-      const data = raw ? JSON.parse(raw) : { sagas: {} }
-      if (data.sagas[sagaId]) {
-        data.sagas[sagaId].watched = ids
+    const sagaId = currentSagaId.value
+    if (sagaId && savedSagas.value[sagaId]) {
+      savedSagas.value = {
+        ...savedSagas.value,
+        [sagaId]: { ...savedSagas.value[sagaId], watched: [...updated] },
       }
-      localStorage.setItem('watchflow_data', JSON.stringify(data))
-    } catch {}
+      _persist()
+    }
   }
 
-  function loadProgress(sagaId) {
-    try {
-      const raw = localStorage.getItem('watchflow_data')
-      if (!raw) return []
-      const data = JSON.parse(raw)
-      return data.sagas?.[sagaId]?.watched ?? []
-    } catch {
-      return []
-    }
+  // ── Painel pessoal ───────────────────────────────────────────────────────
+
+  function getProgress(sagaId) {
+    const saga = savedSagas.value[sagaId]
+    if (!saga) return { watched: 0, total: 0, percent: 0 }
+    const watched = saga.watched?.length ?? 0
+    const total = saga.totalMovies ?? 0
+    return { watched, total, percent: total > 0 ? Math.round((watched / total) * 100) : 0 }
+  }
+
+  function removeSaga(sagaId) {
+    const updated = { ...savedSagas.value }
+    delete updated[sagaId]
+    savedSagas.value = updated
+    _persist()
   }
 
   return {
-    watchedIds,
-    orderedIds,
+    savedSagas,
     currentSagaId,
     currentSagaName,
+    orderedIds,
+    watchedIds,
     nextId,
     watchedCount,
+    loadFromStorage,
+    saveSaga,
     setCurrentSaga,
     getStatus,
     toggleWatched,
+    getProgress,
+    removeSaga,
   }
 })
