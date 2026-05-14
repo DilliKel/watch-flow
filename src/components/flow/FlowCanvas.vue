@@ -11,6 +11,8 @@ const props = defineProps({
   edges: { type: Array, default: () => [] },
 })
 
+const emit = defineEmits(['nodeClick'])
+
 const nodeTypes = { movie: markRaw(MovieNode) }
 
 const store = useSagaStore()
@@ -49,6 +51,7 @@ watch(() => store.nextId, async () => {
       :min-zoom="0.1"
       :max-zoom="4"
       class="wf-flow"
+      @node-click="({ node }) => emit('nodeClick', node.data.tmdbId)"
     >
       <MiniMap
         :node-color="(node) => {
