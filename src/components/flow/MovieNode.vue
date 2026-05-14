@@ -25,6 +25,9 @@ const bgColor = computed(() => {
 
 const nodeOpacity = computed(() => (status.value === 'upcoming' ? '0.55' : '1'))
 
+// Stagger: cap at 800ms para sagas longas
+const animDelay = computed(() => `${Math.min((props.data.order - 1) * 50, 800)}ms`)
+
 function onClick() {
   store.toggleWatched(props.data.tmdbId)
 }
@@ -37,6 +40,7 @@ function onClick() {
       borderColor: borderColor,
       background: bgColor,
       opacity: nodeOpacity,
+      animationDelay: animDelay,
     }"
     :class="{ 'movie-node--next': status === 'next' }"
     @click="onClick"
@@ -104,6 +108,12 @@ function onClick() {
   position: relative;
   overflow: visible;
   user-select: none;
+  animation: nodeEnter 0.35s ease both;
+}
+
+@keyframes nodeEnter {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 .movie-node:hover {
