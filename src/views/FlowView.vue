@@ -10,6 +10,7 @@ import FlowList from '@/components/flow/FlowList.vue'
 import MovieDrawer from '@/components/flow/MovieDrawer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import FlowTour from '@/components/ui/FlowTour.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -134,6 +135,7 @@ onMounted(async () => {
       <!-- ── Barra de topo ──────────────────────────────────────────── -->
       <div class="absolute top-4 left-4 right-4 z-10 flex items-center gap-3">
         <div
+          data-tour="flow-topbar"
           class="flex items-center gap-3 px-4 py-2 rounded-full mx-auto pointer-events-none"
           style="background: var(--wf-bg-elevated); border: 1px solid var(--wf-border)"
         >
@@ -155,8 +157,12 @@ onMounted(async () => {
           <span class="text-xs" style="color: var(--wf-text-muted)">{{ progressPercent }}%</span>
         </div>
 
+        <!-- Tour -->
+        <FlowTour />
+
         <!-- Botão favoritar -->
         <button
+          data-tour="flow-save"
           class="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all"
           :style="isSaved
             ? 'background: var(--wf-watched-bg); color: var(--wf-watched); border: 1px solid var(--wf-watched)'
@@ -197,7 +203,7 @@ onMounted(async () => {
       </Transition>
 
       <!-- Desktop: FlowCanvas -->
-      <div class="hidden sm:block w-full h-full" style="position: relative; z-index: 1">
+      <div data-tour="flow-canvas" class="hidden sm:block w-full h-full" style="position: relative; z-index: 1">
         <FlowCanvas :nodes="nodes" :edges="edges" @node-click="openDrawer" />
       </div>
 
