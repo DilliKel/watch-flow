@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useSagaStore } from '@/stores/sagaStore'
 import SagaCard from '@/components/saga/SagaCard.vue'
 import SagaRow from '@/components/saga/SagaRow.vue'
+import SagaTour from '@/components/ui/SagaTour.vue'
 
 const store = useSagaStore()
 
@@ -42,9 +43,12 @@ const totalWatched = computed(() =>
     <!-- Header da tela -->
     <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
       <div class="flex-1">
-        <h1 class="text-2xl font-semibold" style="color: var(--wf-text-primary)">
-          Minhas Sagas
-        </h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-semibold" style="color: var(--wf-text-primary)" data-tour="sagas-header">
+            Minhas Sagas
+          </h1>
+          <SagaTour />
+        </div>
         <p class="text-sm mt-1" style="color: var(--wf-text-muted)">
           {{ sortedSagas.length }} saga{{ sortedSagas.length !== 1 ? 's' : '' }} salva{{ sortedSagas.length !== 1 ? 's' : '' }}
           <span v-if="totalWatched > 0">
@@ -59,6 +63,7 @@ const totalWatched = computed(() =>
         <!-- Ordenação -->
         <select
           v-model="sort"
+          data-tour="sagas-sort"
           class="text-xs px-2.5 py-2 rounded-lg outline-none cursor-pointer"
           style="background: var(--wf-bg-elevated); color: var(--wf-text-muted); border: 1px solid var(--wf-border)"
         >
@@ -69,6 +74,7 @@ const totalWatched = computed(() =>
 
         <!-- Toggle grid / lista -->
         <div
+          data-tour="sagas-viewmode"
           class="flex rounded-lg overflow-hidden"
           style="border: 1px solid var(--wf-border)"
         >
