@@ -23,6 +23,12 @@ WatchFlow transforma sagas de filmes em **grafos interativos navegáveis**. Busq
 
 É um projeto de portfólio construído para demonstrar domínio do **VueFlow** integrado a dados reais da **TMDB API**.
 
+## 🎥 Demonstração
+
+Veja abaixo como é o fluxo principal do WatchFlow: registrar uma saga e acompanhar a animação quando o fluxo é concluído.
+
+![Demonstração do WatchFlow](public/pictures/gif-watch-flow.gif)
+
 ---
 
 ## 🚀 Funcionalidades
